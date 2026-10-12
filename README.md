@@ -4,7 +4,7 @@
 
 这是一个面向 AI 辅助开发的 Codex skill，用于规范 Git commit 和 GitHub Pull Request 工作流。
 
-它会根据请求进入 commit 或 PR 流程，强制说明 **What / Why / How**，并允许每次选择人工审查或 AI 审查。它是一套工作流规范和本地辅助脚本，不是远程服务，也不是自动合并机器人。
+它会根据请求进入 commit 或 PR 流程，强制说明 **What / Why / Test**，并允许每次选择人工审查或 AI 审查。它是一套工作流规范和本地辅助脚本，不是远程服务，也不是自动合并机器人。
 
 ## 功能
 
@@ -12,7 +12,7 @@
 - 支持两种明确的审查模式：
   - **人工审查**：用户审查 diff，并保留用户提供的意图原文
   - **AI 审查**：Agent 审查实际 diff，记录发现的问题，遇到关键问题时停止提交
-- 每个 commit message 和 PR body 都必须说明 What、Why、How
+- 每个 commit message 和 PR body 都必须说明 What、Why、Test
 - 鼓励精确暂存，并保证一个 commit 只包含一个逻辑变更
 - 默认使用 draft PR，检查和审查完成后再转为 ready
 - 收集经过清理的环境元数据，用于审计追踪
@@ -24,12 +24,12 @@
 
 AI 辅助开发产生的变更，需要让审查者清楚看到改了什么、为什么改、怎么实现、如何验证，以及由谁完成审查。这套工作流将人工意图和机器实现分开，同时在用户明确委托时支持 AI 直接审查。
 
-## 工作方式
+## 工作流程
 
 1. 读取仓库规则、分支状态、工作区状态和完整 diff。
 2. 选择 `commit` 或 `pr`。
 3. 选择 `human` 或 `ai` 审查模式。
-4. 编写 What / Why / How，并记录测试、发现和风险。
+4. 编写 What / Why / Test，并记录发现和风险。
 5. 运行相关检查，以及仓库提供的完整 gate。
 6. 只在用户授权的范围内创建本地 commit 或 draft PR。
 7. 更新已有 PR 时，同时检查普通评论和 inline review comments。
@@ -67,9 +67,9 @@ Commit message 包含：
 
 What: <可观察到的变更>
 Why: <问题或需求>
-How: <实现方式>
+Test: <检查和结果>
 
-Tests: <命令和结果>
+Test: <命令和结果>
 Review: human-approved
 Risks: <剩余风险或 None known>
 ```
@@ -78,7 +78,7 @@ Risks: <剩余风险或 None known>
 
 ```text
 使用 $pr-commit-workflow，以 ai 模式准备并创建 draft PR。
-审查 diff，运行相关检查，并包含 What、Why、How、测试和风险。
+审查 diff，运行相关检查，并包含 What、Why、Test 和风险。
 ```
 
 Agent 必须检查正常路径和失败路径、兼容性影响、输入校验、权限、错误处理、测试质量和改动范围。存在未解决的 critical finding 时，不得提交。
@@ -89,12 +89,15 @@ Agent 必须检查正常路径和失败路径、兼容性影响、输入校验�
 python scripts/build_pr_body.py \\
   --what "Add explicit review modes" \\
   --why "Make commit and PR decisions auditable" \\
-  --how "Route through human or AI review checklists" \\
+  --test "Run the relevant human or AI review checks" \\
   --review-mode ai \\
+  --language zh \\
   --output pr-body.md
 ```
 
 辅助脚本会从白名单中收集 Harness、Model、Thinking level、Terminal、System 和 Python 信息。发布前必须人工检查生成的文件。
+
+使用 `--language zh` 输出中文，使用 `--language en` 输出英文；默认语言为英文。
 
 ### 加入 Prompt History
 

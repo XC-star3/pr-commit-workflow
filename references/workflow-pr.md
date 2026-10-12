@@ -13,13 +13,15 @@ Use this reference after the request has been routed to `pr`.
 
 ## 2. Write the PR body
 
+Choose `en` or `zh` and keep the body consistent. The helper supports this with `--language en` or `--language zh`.
+
 Use [pr-human-template.md](pr-human-template.md) as the body shape. The body must explain:
 
 - **What** changed, in observable terms.
 - **Why** the change is needed, tied to a user problem, bug, issue, or requirement.
-- **How** it works, including important design choices and boundaries.
+- **Test** checks run and their outcomes.
 
-Also include tests, review mode, risks, and any follow-up work. In `human` mode, the user supplies the intent section. Preserve it verbatim; do not generate, polish, or reinterpret the user's Why. In `ai` mode, the agent may draft the body but must label it AI-reviewed and include concrete evidence from the diff and checks.
+Also include review mode, risks, and any follow-up work. In `human` mode, the user supplies the intent section. Preserve it verbatim; do not generate, polish, or reinterpret the user's Why. In `ai` mode, the agent may draft the body but must label it AI-reviewed and include concrete evidence from the diff and checks.
 
 Use `scripts/build_pr_body.py` to append sanitized environment metadata when the repository or user wants an audit trail. If prompt history is available and the user wants auditability, provide a UTF-8 history file through `--prompt-history-file`: start each entry with `ISO-8601 timestamp<TAB>verbatim prompt`, and place continuation lines below it. Redact only sensitive portions and record that redaction. Long prompts are rendered as code blocks. Never paste arbitrary environment values or secrets into a PR body.
 
@@ -31,7 +33,7 @@ After submission, report the PR URL, draft status, base/head branches, review mo
 
 ## 4. Feedback and updates
 
-When a reviewer requests changes, classify each comment as valid, unclear, or out of scope. For valid comments, make the smallest fix, rerun affected checks, update What/How if behavior changed, and push only when the user requested the update. For false positives, explain the concrete code or test evidence in the reply.
+When a reviewer requests changes, classify each comment as valid, unclear, or out of scope. For valid comments, make the smallest fix, rerun affected checks, update What/Test if behavior or verification changed, and push only when the user requested the update. For false positives, explain the concrete code or test evidence in the reply.
 
 For an existing PR, inspect both conversation-level and inline review comments:
 

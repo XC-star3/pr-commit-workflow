@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a PR body with What/Why/How fields and sanitized audit metadata."""
+"""Build a PR body with What/Why/Test fields and sanitized audit metadata."""
 
 from __future__ import annotations
 
@@ -106,44 +106,85 @@ def read_prompt_history(path: Optional[str]) -> List[Tuple[str, str]]:
 def build_body(
     what: Optional[str],
     why: Optional[str],
-    how: Optional[str],
+    test: Optional[str],
     review_mode: str,
+    language: str = "en",
     prompt_history_file: Optional[str] = None,
 ) -> str:
+    if language == "zh":
+        labels = {
+            "what": "做了什么（What）",
+            "why": "为什么（Why）",
+            "test": "测试（Test）",
+            "verification": "验证",
+            "review": "审查",
+            "findings": "发现",
+            "risks": "风险与后续工作",
+            "metadata": "环境元数据",
+            "history": "Prompt History",
+            "observable": "可观察到的变更",
+            "reason": "问题、需求或用户价值",
+            "test_placeholder": "执行的检查和结果",
+            "command": "命令",
+            "result": "结果",
+        }
+    else:
+        labels = {
+            "what": "What",
+            "why": "Why",
+            "test": "Test",
+            "verification": "Verification",
+            "review": "Review",
+            "findings": "Findings",
+            "risks": "Risks and follow-up",
+            "metadata": "Environment metadata",
+            "history": "Prompt History",
+            "observable": "observable change",
+            "reason": "problem, requirement, or user value",
+            "test_placeholder": "checks run and their outcomes",
+            "command": "command",
+            "result": "result",
+        }
+    findings_placeholder = "摘要或 None" if language == "zh" else "summary or 'None'"
+    risk_placeholder = (
+        "<剩余风险、兼容性说明、发布细节或 None known>"
+        if language == "zh"
+        else "<remaining risk, compatibility note, rollout detail, or 'None known'>"
+    )
     lines = [
-        "## What",
+        f"## {labels['what']}",
         "",
-        value_or_placeholder(what, "observable change"),
+        value_or_placeholder(what, labels["observable"]),
         "",
-        "## Why",
+        f"## {labels['why']}",
         "",
-        value_or_placeholder(why, "problem, requirement, or user value"),
+        value_or_placeholder(why, labels["reason"]),
         "",
-        "## How",
+        f"## {labels['test']}",
         "",
-        value_or_placeholder(how, "implementation approach and boundaries"),
+        value_or_placeholder(test, labels["test_placeholder"]),
         "",
-        "## Verification",
+        f"## {labels['verification']}",
         "",
-        "- `<command>`: <result>",
+        f"- <{labels['command']}>: <{labels['result']}>",
         "",
-        "## Review",
+        f"## {labels['review']}",
         "",
-        f"- Mode: `{review_mode}`",
-        "- Findings: <summary or 'None'>",
+        f"- {'模式' if language == 'zh' else 'Mode'}: `{review_mode}`",
+        f"- {labels['findings']}: <{findings_placeholder}>",
         "",
-        "## Risks and follow-up",
+        f"## {labels['risks']}",
         "",
-        "<remaining risk, compatibility note, rollout detail, or 'None known'>",
+        risk_placeholder,
         "",
-        "## Environment metadata",
+        f"## {labels['metadata']}",
         "",
     ]
 
     lines.extend(f"- {key}: `{sanitize_metadata(value)}`" for key, value in collect_metadata())
     history = read_prompt_history(prompt_history_file)
     if history:
-        lines.extend(["", "## Prompt History", ""])
+        lines.extend(["", f"## {labels['history']}", ""])
         short_history = [entry for entry in history if len(entry[1]) <= 200 and "\n" not in entry[1]]
         long_history = [entry for entry in history if entry not in short_history]
         if short_history:
@@ -170,11 +211,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--what")
     parser.add_argument("--why")
-    parser.add_argument("--how")
+    parser.add_argument("--test", help="Checks run and their outcomes")
     parser.add_argument("--review-mode", choices=("human", "ai"), default="human")
+    parser.add_argument("--language", choices=("en", "zh"), default="en")
     parser.add_argument(
         "--prompt-history-file",
-        help="TSV file containing one ISO-8601 timestamp<TAB>verbatim prompt per line",
+        help="UTF-8 history file: timestamp<TAB>prompt, with optional continuation lines",
     )
     parser.add_argument("--output", help="Write to a file instead of stdout")
     args = parser.parse_args()
@@ -182,8 +224,9 @@ def main() -> int:
         body = build_body(
             args.what,
             args.why,
-            args.how,
+            args.test,
             args.review_mode,
+            args.language,
             args.prompt_history_file,
         )
     except (OSError, ValueError) as error:

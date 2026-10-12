@@ -4,7 +4,7 @@
 
 A Codex skill for high-signal Git commits and GitHub pull requests in agent-assisted development.
 
-It routes each request through a commit or PR workflow, requires **What / Why / How** context, and lets the user choose between a human review and an AI review. It is a workflow guide with a small local helper, not a remote service or an automatic merge bot.
+It routes each request through a commit or PR workflow, requires **What / Why / Test** context, and lets the user choose between a human review and an AI review. It is a workflow guide with a small local helper, not a remote service or an automatic merge bot.
 
 ## What it does
 
@@ -12,7 +12,7 @@ It routes each request through a commit or PR workflow, requires **What / Why / 
 - Offers two explicit review modes:
   - **Human review** — the user approves the proposed diff and preserves their intent text verbatim
   - **AI review** — the agent reviews the actual diff, records findings, and stops on critical issues
-- Requires What, Why, and How for every commit message and PR body
+- Requires What, Why, and Test for every commit message and PR body
 - Encourages surgical staging and one logical change per commit
 - Uses draft PRs until requested checks and review pass
 - Captures sanitized environment metadata for audit trails
@@ -24,12 +24,12 @@ It routes each request through a commit or PR workflow, requires **What / Why / 
 
 AI-assisted changes are easier to review when the result, motivation, implementation, evidence, and review mode are visible in the Git history. The workflow keeps human intent separate from generated implementation details while still supporting direct AI review when the user delegates it.
 
-## How it works
+## Workflow
 
 1. Inspect repository guidance, branch state, status, and the complete diff.
 2. Choose `commit` or `pr`.
 3. Choose `human` or `ai` review.
-4. Write What / Why / How and record tests, findings, and risks.
+4. Write What / Why / Test and record findings and risks.
 5. Run the relevant checks and the repository gate when available.
 6. Commit locally or create/update a draft PR only when the requested action is authorized.
 7. For an existing PR, inspect both general and inline review comments before making updates.
@@ -67,9 +67,9 @@ The message includes:
 
 What: <observable change>
 Why: <problem or requirement>
-How: <implementation approach>
+Test: <checks and results>
 
-Tests: <command and result>
+Test: <command and result>
 Review: human-approved
 Risks: <remaining risk or None known>
 ```
@@ -78,7 +78,7 @@ Risks: <remaining risk or None known>
 
 ```text
 Use $pr-commit-workflow to prepare and create a draft PR in AI review mode.
-Review the diff, run the relevant checks, and include What, Why, How, tests, and risks.
+Review the diff, run the relevant checks, and include What, Why, Test, and risks.
 ```
 
 The agent must review normal and failure paths, compatibility impact, input validation, permissions, error handling, test quality, and scope before submission. An unresolved critical finding blocks submission.
@@ -89,12 +89,15 @@ The agent must review normal and failure paths, compatibility impact, input vali
 python scripts/build_pr_body.py \
   --what "Add explicit review modes" \
   --why "Make commit and PR decisions auditable" \
-  --how "Route through human or AI review checklists" \
+  --test "Run the relevant human or AI review checks" \
   --review-mode ai \
+  --language en \
   --output pr-body.md
 ```
 
 The helper records Harness, Model, Thinking level, Terminal, System, and Python metadata from an allowlist. Review the generated file before publishing it.
+
+Use `--language en` for English output or `--language zh` for Chinese output. English is the default.
 
 ### Include prompt history
 

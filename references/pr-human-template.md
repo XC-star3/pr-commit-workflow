@@ -8,6 +8,8 @@ _The rest of this PR was prepared by <model>-<thinking-level>, running in the <h
 
 <!-- In AI mode, omit this section and identify the AI review in the Review section. -->
 
+<!-- Choose the output language: `en` or `zh`. Keep the same language across the body. -->
+
 ## What
 
 <!-- In human mode, this section may repeat the observable part of the intent. Preserve user wording. In AI mode, the agent may draft it. -->
@@ -20,9 +22,9 @@ _The rest of this PR was prepared by <model>-<thinking-level>, running in the <h
 
 <problem, requirement, or user value>
 
-## How
+## Test
 
-<implementation approach, important design choices, and boundaries>
+<checks run and their outcomes>
 
 ## Verification
 
