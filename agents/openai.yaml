@@ -1,0 +1,4 @@
+interface:
+  display_name: "PR & Commit Workflow"
+  short_description: "Reviewed commits and PRs with What Why How"
+  default_prompt: "Use $pr-commit-workflow to prepare a commit or pull request with What, Why, and How."
